@@ -71,6 +71,8 @@ class Pipeline(object):
             query = """SELECT DISTINCT(game_id)
                        FROM nba.game
                        WHERE game_id > (SELECT MAX(game_id) FROM nba.teams_games)"""
+        else:
+            exit(1)
         games_list = []
         with psycopg2.connect(self.dsn) as conn:
             games = Queries.retrieve_query(conn, query, ())
@@ -293,14 +295,14 @@ class Pipeline(object):
         with psycopg2.connect(self.dsn) as conn:
             for player in players:
                 player_tup = (players[player]['player_id'], game_id, players[player]['team_id'],
-                               players[player]['minutes'], players[player]['fgm'], players[player]['fga'],
-                               players[player]['fgp'], players[player]['fg3m'], players[player]['fg3a'],
-                               players[player]['fg3p'], players[player]['ftm'], players[player]['fta'],
-                               players[player]['ftp'], players[player]['oreb'], players[player]['dreb'],
-                               players[player]['rebs'], players[player]['ast'], players[player]['stl'],
-                               players[player]['blk'], players[player]['tov'], players[player]['pts'],
-                               players[player]['efg_pct'], players[player]['ts_pct'], players[player]['usg_pct'],
-                               players[player]['pace'], players[player]['fd_fp'], players[player]['dk_fp'])
+                              players[player]['minutes'], players[player]['fgm'], players[player]['fga'],
+                              players[player]['fgp'], players[player]['fg3m'], players[player]['fg3a'],
+                              players[player]['fg3p'], players[player]['ftm'], players[player]['fta'],
+                              players[player]['ftp'], players[player]['oreb'], players[player]['dreb'],
+                              players[player]['rebs'], players[player]['ast'], players[player]['stl'],
+                              players[player]['blk'], players[player]['tov'], players[player]['pts'],
+                              players[player]['efg_pct'], players[player]['ts_pct'], players[player]['usg_pct'],
+                              players[player]['pace'], players[player]['fd_fp'], players[player]['dk_fp'])
                 Queries.insert_query(conn, players_games_query, player_tup)
         conn.close()
 
@@ -346,6 +348,7 @@ class Pipeline(object):
                 elif pipeline_type == 'update':
                     for game in game_logs:
                         if game[1] not in game_id_set and int(game[1]) > max_game:
+                            print('Processing:', game[1])
                             Queries.insert_query(conn, query, (self._ingest_game_log(game, settings.NBA_SEASON)))
                             game_id_set.add(game[1])
         conn.close()
@@ -390,6 +393,7 @@ class Pipeline(object):
         try_again_list = []
         for game in self._grab_games_list(pipeline_type=pipeline_type):
             try:
+                print('Processing for _build_teams_players_logs:', game)
                 self._game_from_boxscore(game)
             except ConnectionError:
                 try_again_list.append(game)
