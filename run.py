@@ -1,6 +1,8 @@
 import sys
+import logging
 from nbadb.pipeline import api
 from nbadb.conf import settings
+logger = logging.getLogger('nbadb')
 
 if __name__ == "__main__":
     if sys.argv[1]:

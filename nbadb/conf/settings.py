@@ -2,6 +2,8 @@
 Contains settings needed for the project to run.
 """
 import os
+import logging
+import logging.config
 from configparser import ConfigParser
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -53,3 +55,30 @@ dfs_scores = {
 # NBA_SEASON constant into a tuple and looping through the seasons.
 NBA_SEASON = '2015-16'
 LEAGUE_ID = '00'
+
+# Let's setup some project-wide logging
+# https://docs.python.org/3/library/logging.html
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'db_op': {
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        }
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'nbadb.out.log',
+            'formatter': 'db_op'
+        }
+    },
+    'loggers': {
+        'nbadb': {
+            'handlers': ['file'],
+            'level': 'INFO'
+        }
+    }
+}
+logging.config.dictConfig(LOGGING)

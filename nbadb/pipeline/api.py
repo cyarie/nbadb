@@ -9,10 +9,12 @@ import os
 import psycopg2
 import json
 import requests
+import logging
 
 from datetime import datetime
 from nbadb.conf import settings
 from nbadb.pipeline.queries import Queries
+logger = logging.getLogger('nbadb')
 
 
 class Pipeline(object):
@@ -89,6 +91,7 @@ class Pipeline(object):
         return max_game
 
     def _game_from_boxscore(self, game_id):
+        logger.info('Starting processing of {}'.format(game_id))
         # Need to do a bunch of setup for this method...
         boxscore_url = "http://stats.nba.com/stats/boxscoreadvanced/?StartPeriod=1&EndPeriod=10&GameID=00{0}" \
                        "&RangeType=0&StartRange=0&EndRange=10".format(game_id)
@@ -305,6 +308,7 @@ class Pipeline(object):
                               players[player]['pace'], players[player]['fd_fp'], players[player]['dk_fp'])
                 Queries.insert_query(conn, players_games_query, player_tup)
         conn.close()
+        logger.info('Finished processing of {}'.format(game_id))
 
     def _build_schema(self):
         with open(self.schema_file, 'r') as schema:
@@ -348,7 +352,7 @@ class Pipeline(object):
                 elif pipeline_type == 'update':
                     for game in game_logs:
                         if game[1] not in game_id_set and int(game[1]) > max_game:
-                            print('Processing:', game[1])
+                            logger.info('Adding game_id {} to database'.format(game[1]))
                             Queries.insert_query(conn, query, (self._ingest_game_log(game, settings.NBA_SEASON)))
                             game_id_set.add(game[1])
         conn.close()
@@ -393,9 +397,9 @@ class Pipeline(object):
         try_again_list = []
         for game in self._grab_games_list(pipeline_type=pipeline_type):
             try:
-                print('Processing for _build_teams_players_logs:', game)
                 self._game_from_boxscore(game)
             except ConnectionError:
+                logger.error('Issue connecting to NBA stats API for game_id {}'.format(game))
                 try_again_list.append(game)
 
         if len(try_again_list):
