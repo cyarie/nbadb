@@ -330,7 +330,7 @@ class Pipeline(object):
                     team_abbv = str(team[4])
                     Queries.insert_query(conn, query, (team_id, team_abbv))
                 else:
-                    print('Encountered None. Not inserting into the DB.')
+                    pass
 
     def _build_games(self, pipeline_type):
         games_url = "http://stats.nba.com/stats/teamgamelog?TeamId={0}&Season={1}&SeasonType=Regular%20Season"
@@ -407,11 +407,17 @@ class Pipeline(object):
                 self._game_from_boxscore(game)
 
     def build(self):
+        logger.info('Building the schema.')
         self._build_schema()
+        logger.info('Building the teams table.')
         self._build_teams()
+        logger.info('Building the games table.')
         self._build_games(pipeline_type='build')
+        logger.info('Building the players table.')
         self._build_players()
+        logger.info('Building the players_games and teams_games tables.')
         self._build_teams_players_logs(pipeline_type='build')
+        logger.info('Finished building the database.')
 
     def _update_games(self):
         self._build_games(pipeline_type='update')
@@ -419,16 +425,18 @@ class Pipeline(object):
     def _update_teams_players_logs(self):
         self._build_teams_players_logs(pipeline_type='update')
 
-    def update(self, *args):
+    def update(self, table_list):
         """
         Takes *args as a parameter, then matches an arg back to a dictionary to figure out which update function to
         run.
-        :param args:
+        :param list table_list:
         :return:
         """
         upd_dict = {
             'games': self._update_games,
             'game_logs': self._update_teams_players_logs
         }
-        for table in args:
+        for table in table_list:
+            logger.info('Started updating {}.'.format(table))
             upd_dict[table]()
+            logger.info('Finished updating {}'.format(table))
