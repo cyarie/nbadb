@@ -9,5 +9,5 @@ setup(
     license='MIT',
     author='Chris Yarie',
     author_email='cyarie@gmail.com',
-    description='Software for building a database of NBA data'
+    description='Software for building a database of NBA data.'
 )

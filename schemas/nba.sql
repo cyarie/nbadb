@@ -91,12 +91,12 @@ CREATE TABLE nba.players_games (
   points INTEGER,
   personal_fouls INTEGER,
   plus_minus INTEGER,
-  efg_pct NUMERIC(5, 2),
-  ts_pct NUMERIC(5, 2),
-  usg_pct NUMERIC(5, 2),
-  pace NUMERIC(5, 2),
-  fd_fp NUMERIC(5, 2),
-  dk_fp NUMERIC(5, 2),
+  efg_pct NUMERIC(6, 2),
+  ts_pct NUMERIC(6, 2),
+  usg_pct NUMERIC(6, 2),
+  pace NUMERIC(6, 2),
+  fd_fp NUMERIC(6, 2),
+  dk_fp NUMERIC(6, 2),
   create_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   modified_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
