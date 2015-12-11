@@ -1,4 +1,3 @@
-import sys
 import argparse
 import logging
 from nbadb.pipeline import api
